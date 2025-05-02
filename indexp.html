@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios Insertados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .user-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .super-admin {
+            background-color: #ffcccc;
+            color: #cc0000;
+        }
+
+        .admin {
+            background-color: #ccffcc;
+            color: #006600;
+        }
+
+        .normal-user {
+            background-color: #ccccff;
+            color: #0000cc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Usuarios Insertados</h1>
+        <table id="usuarios-tabla">
+            <thead>
+                <tr>
+                    <th>id usuario</th>
+                    <th>Nombre de Usuario</th>
+                    <th>Identificación</th>
+                    <th>Email</th>
+                    <th>Tipo de Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos de los usuarios se mostrarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Configuración de la API
+        const SUPABASE_URL = 'https://ninbepsmalhzaohghbmj.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pbmJlcHNtYWxoemFvaGdoYm1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4NTcwNzcsImV4cCI6MjA1OTQzMzA3N30.gpy7aDOadlrK4-W-xqMDDzKNQBNaxcdNnOrWgBp4yns';
+
+        // Función para obtener los usuarios desde Supabase
+        async function obtenerUsuarios() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/usuarios`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const usuarios = await response.json();
+                mostrarUsuarios(usuarios);
+
+            } catch (error) {
+                console.error('❌ Error al obtener los usuarios:', error);
+            }
+        }
+
+        // Función para mostrar los usuarios en la tabla
+        function mostrarUsuarios(usuarios) {
+            const tablaUsuarios = document.querySelector('#usuarios-tabla tbody');
+            tablaUsuarios.innerHTML = '';  // Limpiar la tabla antes de llenarla
+
+            usuarios.forEach(usuario => {
+                const fila = document.createElement('tr');
+                
+                // Determinar el tipo de usuario y la clase CSS correspondiente
+                let tipoUsuario, claseUsuario;
+                if (usuario.usuario_superadministrador) {
+                    tipoUsuario = 'Super Administrador';
+                    claseUsuario = 'super-admin';
+                } else if (usuario.usuario_administrador) {
+                    tipoUsuario = 'Administrador';
+                    claseUsuario = 'admin';
+                } else {
+                    tipoUsuario = 'Usuario Normal';
+                    claseUsuario = 'normal-user';
+                }
+
+                fila.innerHTML = `
+                    <td>${usuario.id_usuario}</td>
+                    <td>${usuario.nombre_usuario}</td>
+                    <td>${usuario.identificacion}</td>
+                    <td>${usuario.email}</td>
+                    <td><span class="user-type ${claseUsuario}">${tipoUsuario}</span></td>
+                `;
+
+                tablaUsuarios.appendChild(fila);
+            });
+        }
+
+        // Llamar la función para obtener los usuarios cuando cargue la página
+        document.addEventListener('DOMContentLoaded', obtenerUsuarios);
+    </script>
+</body>
+
+</html>
